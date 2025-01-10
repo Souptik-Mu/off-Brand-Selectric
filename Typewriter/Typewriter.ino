@@ -1,16 +1,6 @@
-/*#include <Keyboard.h>
-#include <KeyboardLayout.h>
-#include <Keyboard_da_DK.h>
-#include <Keyboard_de_DE.h>
-#include <Keyboard_es_ES.h>
-#include <Keyboard_fr_FR.h>
-#include <Keyboard_it_IT.h>
-#include <Keyboard_sv_SE.h>
- */
+#include <PS2Keyboard.h>
 
 class Printer{
-  
-  
   private:
       //serial port pins
     int Strobe;
@@ -28,7 +18,7 @@ class Printer{
       return;
       }
   public:
-    void setPins(int DataBits_pin[], int strobe_pin, int busy_pin)
+    void begin(int DataBits_pin[], int strobe_pin, int busy_pin)
     {
       Strobe = strobe_pin;
       Busy = busy_pin;
@@ -38,38 +28,43 @@ class Printer{
       pinMode(Busy,INPUT);
       for(byte i=0 ; i<8 ; i++)
         pinMode(DataBit[i], OUTPUT);
+
+      digitalWrite(strobe,HIGH);
     }
-    void Print(byte msg)
+    void printByte(byte msg)
     {
-      Wait_if_Busy(); // waits until the busy pin goes low
+      //Wait_if_Busy(); // waits until the busy pin goes low
       
       for(byte i=0 ; i<8 ; i++){
-        digitalWrite(DataBit[0],bitRead(msg,0));
+        digitalWrite(DataBit[i],bitRead(msg,i));
         //Serial.println(bitRead(msg,0));
       }
       Pulse_strobe(); 
     }
   
 };
+
+PS2Keyboard keyboard;
 Printer dotmatrix;
+
 void setup() {
   // Minimum pins needed to run this with parallel port
   int dpin[8] = {9,8,7,6, 5,4,3,2}; //D0 to D7
   int busy = 11 , strobe = 12 ;
-  
   //keyboard pins (usb/ps2)
   const int Data = 10; // D+
   const int Clock = 13; // D-
-  
-  dotmatrix.setPins(dpin, strobe, busy); 
-  //initialise keyboard...?(idk)
+
+  keyboard.begin(Data,Clock);
+  dotmatrix.begin(dpin, strobe, busy);
   //Serial.begin(9600);
   
 }
 
 void loop() {
-  // read input from keyboard
-  // convert scan code to ascii(byte)
-  // write the ascii to the printer -> dotmatrix.Print(ascii)
-
+  if(keyboard.available()) {
+    byte c = keyboard.read();
+    dotmatrix.printByte(c);
+    //Serial.println(c);
+  }
 }
