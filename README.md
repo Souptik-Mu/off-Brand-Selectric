@@ -1,4 +1,4 @@
-# off-Brand-Selectric
+# Dot Matrix Typewriter
 
 # Overview
 It's basically hardware that allows connection between a keybord(usb or ps2) and a parallel port of a dot matrix printer.
